@@ -1,14 +1,13 @@
 const { User } = require('../models');
 const { signToken } = require('../utils/auth');
+const { AuthenticationError } = require('apollo-server-express');
 
 const resolvers = {
     Query: {
         user: async (parent, args, context) => {
             if (context.user) {
                 // will have to work on this one, not sure if this is the full thing that we need. 
-                const userData = await User.findOne({
-                    _id: context.user._id
-                })
+                const userData = await User.findOne({$or: [{ _id: context.user._id }, {username: context.user.username}]})
                 .select('-__v')
 
                 return userData;
@@ -43,11 +42,12 @@ const resolvers = {
             return { token, user };
         },
         // looks like the add thought from deep thoughts in the weekly module
-        addBook: async (parent, args, context) => {
+        // there is no add book, it has to be save book according to the user-routes
+        saveBook: async (parent, args, context) => {
             if(context.user){
             const book = await User.findByIdAndUpdate(
                 { _id: context.user._id },
-                { $addToSet: { savedBooks: args} },
+                { $addToSet: { savedBooks: args.input} },
                 { new: true, runValidators: true }
             );
 
@@ -60,7 +60,7 @@ const resolvers = {
         removeBook: async (parent, args, context) => {
             const updatedUser = await User.findByIdAndUpdate(
                 { _id: context.user._id},
-                { $pull: { savedBooks: { bookId: args }}},
+                { $pull: { savedBooks: { bookId: args.bookId }}},
                 { new: true }
             )
             if(!updatedUser){
