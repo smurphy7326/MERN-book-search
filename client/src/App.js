@@ -9,7 +9,20 @@ import { setContext } from '@apollo/client/link/context';
 
 // Graphql playground for mutations
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3001/graphql'
+  uri: '/graphql'
+});
+
+// Creates a middelware 
+const authLink = setContext((_, { headers }) => {
+  // retrieves the token from local storage if it exists
+  const token = localStorage.getItem("id_token");
+  // Returns the headers to the context so that httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
 });
 
 // Client to run the authLink before the graphql API

@@ -6,14 +6,13 @@ const resolvers = {
     Query: {
         user: async (parent, args, context) => {
             if (context.user) {
-                // will have to work on this one, not sure if this is the full thing that we need. 
-                const userData = await User.findOne({$or: [{ _id: context.user._id }, {username: context.user.username}]})
-                .select('-__v')
+                const userData = await User.findOne({ _id: context.user._id })
+                .select('-__v -password')
 
                 return userData;
             }
 
-            throw new AuthenticationError('Not logged in');
+            throw new AuthenticationError('You are not logged In');
         },
     },
 
@@ -35,7 +34,7 @@ const resolvers = {
                 return { token, user };
             },
 
-        addUser: async (parent, args) => {
+        createUser: async (parent, args) => {
             const user = await User.create(args);
             const token = signToken(user);
     
@@ -45,13 +44,13 @@ const resolvers = {
         // there is no add book, it has to be save book according to the user-routes
         saveBook: async (parent, args, context) => {
             if(context.user){
-            const book = await User.findByIdAndUpdate(
+            const updatedUser = await User.findByIdAndUpdate(
                 { _id: context.user._id },
                 { $addToSet: { savedBooks: args.input} },
                 { new: true, runValidators: true }
             );
 
-            return book;
+            return updatedUser;
             }
             throw new AuthenticationError('You need to be logged in!');    
         },

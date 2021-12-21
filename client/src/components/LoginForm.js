@@ -14,7 +14,7 @@ const LoginForm = () => {
   const [showAlert, setShowAlert] = useState(false);
 
   // assigns the loginuser mutation to the loginuser function and allows it to error report
-  const [login] = useMutation(LOGIN_USER);
+  const [loginUser, { error }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -32,7 +32,7 @@ const LoginForm = () => {
     }
 
     try {
-      const { data } = await login({variables: {...userFormData}});
+      const { data } = await loginUser({ variables: {...userFormData }});
       Auth.login(data.login.token);
 
     } catch (err) {
