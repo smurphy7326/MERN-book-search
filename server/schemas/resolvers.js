@@ -35,9 +35,40 @@ const resolvers = {
                 const token = signToken(user);
                 return { token, user };
             },
-        
 
+        addUser: async (parent, args) => {
+            const user = await User.create(args);
+            const token = signToken(user);
+    
+            return { token, user };
+        },
+        // looks like the add thought from deep thoughts in the weekly module
+        addBook: async (parent, args, context) => {
+            if(context.user){
+            const book = await User.findByIdAndUpdate(
+                { _id: context.user._id },
+                { $addToSet: { savedBooks: args} },
+                { new: true, runValidators: true }
+            );
+
+            return book;
+            }
+            throw new AuthenticationError('You need to be logged in!');    
+        },
+        // remove should be about the same as the add book but a little different, may have to come back to this one
+
+        removeBook: async (parent, args, context) => {
+            const updatedUser = await User.findByIdAndUpdate(
+                { _id: context.user._id},
+                { $pull: { savedBooks: { bookId: args }}},
+                { new: true }
+            )
+            if(!updatedUser){
+                throw new AuthenticationError('Could not find a User with this ID');
+            }
+            return updatedUser;
+        }
     }
-}
+};
 
 module.exports = resolvers;
