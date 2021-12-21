@@ -1,10 +1,18 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { ApolloProvider, ApolloClient } from '@apollo/client';
+import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import SearchBooks from './pages/SearchBooks';
 import SavedBooks from './pages/SavedBooks';
 import Navbar from './components/Navbar';
 
+import { setContext } from '@apollo/client/link/context';
+
+// Graphql playground for mutations
+const httpLink = createHttpLink({
+  uri: 'http://localhost:3001/graphql'
+});
+
+// Client to run the authLink before the graphql API
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
