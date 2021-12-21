@@ -13,8 +13,31 @@ const resolvers = {
 
                 return userData;
             }
-        }
+
+            throw new AuthenticationError('Not logged in');
+        },
     },
+
+    Mutation: {
+        login: async (parent, {email, password }) => {
+            const user = await User.findOne({ email });
+
+            if (!user) {
+                throw new AuthenticationError('Incorrect login');
+            }
+
+            const correctPw = await user.isCorrectPassword(passord);
+
+                if (!correctPw) {
+                    throw new AuthenticationError('Incorrect password')
+                }
+
+                const token = signToken(user);
+                return { token, user };
+            },
+        
+
+    }
 }
 
 module.exports = resolvers;
