@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect }from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
 // we are going to use the mutations again for the savedbooks
@@ -13,17 +13,12 @@ import { GET_ME } from '../utils/queries'
 const SavedBooks = () => {
   const { loading, error, data, refetch } = useQuery(GET_ME);
 
-  // useEffect hook to refetch the user's saved book data every time the data changes
   useEffect(() => {
     refetch();
   }, [refetch, data]);
 
   // Sets the userData variable to the data retrieved from the GET_ME query
   const userData = data?.me;
-
-  if (error) {
-    console.log(error.message);
-  }
 
   // Applies the REMOVE_BOOK mutation to the function removeBook to be called
   const [removeBook] = useMutation(REMOVE_BOOK);
@@ -55,6 +50,9 @@ const SavedBooks = () => {
     return <h2>LOADING...</h2>;
   }
 
+  if (error) {
+    console.log(error.message);
+  }
 
   return (
     <>

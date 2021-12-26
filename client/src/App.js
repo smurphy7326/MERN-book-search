@@ -12,7 +12,7 @@ const httpLink = createHttpLink({
   uri: '/graphql'
 });
 
-// Creates a middelware 
+// Creates a middleware 
 const authLink = setContext((_, { headers }) => {
   // retrieves the token from local storage if it exists
   const token = localStorage.getItem("id_token");
