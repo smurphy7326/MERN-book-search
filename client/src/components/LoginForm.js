@@ -13,7 +13,6 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
-  // assigns the loginuser mutation to the loginuser function and allows it to error report
   const [loginUser, { error }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
