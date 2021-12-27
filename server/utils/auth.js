@@ -8,7 +8,6 @@ module.exports = {
   // function for our authenticated routes
   authMiddleware: function ({ req }) {
     // allows token to be sent via  req.query or headers
-    // forgot to add the req.body.token
     let token = req.body.token || req.query.token || req.headers.authorization;
 
     // ["Bearer", "<tokenvalue>"]
@@ -31,7 +30,6 @@ module.exports = {
       console.log('Invalid token');
     }
 
-    // return updated request object
     return req;
   },
   signToken: function ({ username, email, _id }) {

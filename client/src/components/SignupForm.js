@@ -4,7 +4,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 // again changing the use to use mutations
 import Auth from '../utils/auth';
 import { useMutation} from '@apollo/client';
-import { CREATE_USER } from '../utils/mutations'
+import { ADD_USER } from '../utils/mutations'
 
 const SignupForm = () => {
   // set initial form state
@@ -19,7 +19,7 @@ const SignupForm = () => {
     setUserFormData({ ...userFormData, [name]: value });
   };
 
-    const [createUser] = useMutation(CREATE_USER);
+    const [addUser] = useMutation(ADD_USER);
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -34,9 +34,9 @@ const SignupForm = () => {
     // use try/catch instead of promises to handle errors
     try {
       //execute addUser mutation and pass in variable data from form
-      const { data } = await createUser({variables: {...userFormData}});
+      const { data } = await addUser({variables: {...userFormData}});
      
-      Auth.login(data.createUser.token);
+      Auth.login(data.addUser.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);

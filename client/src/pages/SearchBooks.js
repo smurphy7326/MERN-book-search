@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
 
-import Auth from '../utils/auth';
-import { searchGoogleBooks} from '../utils/API'; // have to erase the saveBook so it can be used down below when it is taken from the mutations and not the code that 
-// was given to us
-import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
-// SAVE_BOOK mutation and useMutation hook
 import { useMutation } from '@apollo/client';
-import { SAVE_BOOK } from '../utils/mutations';
+import { SAVE_BOOK } from '../utils/mutations'
+
+import Auth from '../utils/auth';
+import { searchGoogleBooks } from '../utils/API';
+import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
 const SearchBooks = () => {
   // create state for holding returned google api data
@@ -17,9 +16,6 @@ const SearchBooks = () => {
 
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
-
-  // have to call for the useMutation and the SAVE_BOOK 
-  const [saveBook, {error}] = useMutation(SAVE_BOOK);
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
@@ -50,7 +46,8 @@ const SearchBooks = () => {
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
-        link:book.selfLink,
+        // added link during graphQL update
+        link: book.volumeInfo.canonicalVolumeLink || ''
       }));
 
       setSearchedBooks(bookData);
@@ -60,22 +57,17 @@ const SearchBooks = () => {
     }
   };
 
+  const [saveBook] = useMutation(SAVE_BOOK);
+
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-
-    // get token
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-    if (!token) {
-      return false;
-    }
-
-    // to get all the different information that is out there be specific about the bookToSave feature
+    
     try {
-     await saveBook({variables: bookToSave});
-
+      await saveBook({
+        variables: { input: { ...bookToSave } }
+      });
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
@@ -88,7 +80,6 @@ const SearchBooks = () => {
       <Jumbotron fluid className='text-light bg-dark'>
         <Container>
           <h1>Search for Books!</h1>
-          {error ? `There is an error with Apollo Client ${error}!` : null}
           <Form onSubmit={handleFormSubmit}>
             <Form.Row>
               <Col xs={12} md={8}>
@@ -127,6 +118,7 @@ const SearchBooks = () => {
                 <Card.Body>
                   <Card.Title>{book.title}</Card.Title>
                   <p className='small'>Authors: {book.authors}</p>
+                  <p className='small'><a href={`${book.link}`}>View on Google Books</a></p>
                   <Card.Text>{book.description}</Card.Text>
                   {Auth.loggedIn() && (
                     <Button

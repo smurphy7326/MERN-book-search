@@ -2,12 +2,14 @@ const { User } = require('../models');
 const { signToken } = require('../utils/auth');
 const { AuthenticationError } = require('apollo-server-express');
 
-const resolvers = {
+const resolvers = 
+{
     Query: {
-        user: async (parent, args, context) => {
+        me: async (parent, args, context) => {
             if (context.user) {
                 const userData = await User.findOne({ _id: context.user._id })
                 .select('-__v -password')
+                .populate('savedBooks');
 
                 return userData;
             }
@@ -34,7 +36,7 @@ const resolvers = {
                 return { token, user };
             },
 
-        createUser: async (parent, args) => {
+        addUser: async (parent, args) => {
             const user = await User.create(args);
             const token = signToken(user);
     
